@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Created-By: IntelliJ IDEA
+Built-By: 29314
+Build-Jdk: 1.8.0_212
+Implementation-Title: intelligenthome_exhibition
+Implementation-Version: 0.0.1-SNAPSHOT
+Implementation-Vendor-Id: cn.jxlg.spark
+Main-Class: ${start-class}
+

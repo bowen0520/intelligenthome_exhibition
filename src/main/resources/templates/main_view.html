@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>房间页</title>
+        <!-- 新 Bootstrap 核心 CSS 文件 -->
+        <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <script src="/js/jquery.min.js" type="text/javascript"></script>
+        <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+        <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <!-- 引入 echarts.js -->
+        <script src="/js/echarts.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row clearfix">
+                <div class="col-md-12 column">
+                    <h3 class="text-info text-left">
+                        房间参数折线图
+                    </h3>
+                </div>
+            </div>
+            <div class="row clearfix">
+                <div class="col-md-12 column">
+                    <div class="tabbable" id="tabs-269832">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a href="#panel-284208" data-toggle="tab">温度图</a>
+                            </li>
+                            <li>
+                                <a href="#panel-670254" data-toggle="tab">湿度图</a>
+                            </li>
+                            <li>
+                                <a href="#panel-334572" data-toggle="tab">co2图</a>
+                            </li>
+                            <li>
+                                <a href="#panel-778426" data-toggle="tab">光照图</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="panel-284208">
+                                <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+                                <div id="main1" style="width: 600px;height:400px;"></div>
+                            </div>
+                            <div class="tab-pane" id="panel-670254">
+                                <div id="main2" style="width: 600px;height:400px;"></div>
+                            </div>
+                            <div class="tab-pane" id="panel-334572">
+                                <div id="main3" style="width: 600px;height:400px;"></div>
+                            </div>
+                            <div class="tab-pane" id="panel-778426">
+                                <div id="main4" style="width: 600px;height:400px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row clearfix">
+                <div class="col-md-12 column">
+                    <a class="btn btn-default" href="/h-page" role="button">历史数据</a>
+                </div>
+            </div>
+        </div>
+        <script>
+            // 基于准备好的dom，初始化echarts实例
+            const myChart1 = echarts.init(document.getElementById('main1'));
+            const myChart2 = echarts.init(document.getElementById('main2'));
+            const myChart3 = echarts.init(document.getElementById('main3'));
+            const myChart4 = echarts.init(document.getElementById('main4'));
+            var temps = [];
+            var hums = [];
+            var co2s = [];
+            var lights = [];
+            $(function(){
+                setInterval(getNewData,10000);
+                function getNewData() {
+                    var url = "/get_environment";
+                    $.ajax({
+                        type : "get",
+                        async : true, //同步请求
+                        url : url,
+                        timeout:1000,
+                        success:function(data){
+                            temps.length=0;
+                            hums.length=0;
+                            co2s.length=0;
+                            lights.length=0;
+                            for(var i=0;i<data.length;i++){
+                                temps.push([data[i]['time'],data[i]['temp']])
+                                hums.push([data[i]['time'],data[i]['hum']])
+                                co2s.push([data[i]['time'],data[i]['co2']])
+                                lights.push([data[i]['time'],data[i]['light']])
+                            }
+                            myChart1.setOption({
+                                xAxis: {
+                                    data: temps.map(function (item) {
+                                        return item[0];
+                                    })
+                                },
+                                dataZoom: [{
+                                    startValue: temps[80][0]
+                                }, {
+                                    type: 'inside'
+                                }],
+                                series: [{
+                                    data: temps.map(function (item) {
+                                        return item[1];
+                                    }),
+                                }]
+                            });
+                            myChart2.setOption({
+                                xAxis: {
+                                    data: hums.map(function (item) {
+                                        return item[0];
+                                    })
+                                },
+                                dataZoom: [{
+                                    startValue: hums[80][0]
+                                }, {
+                                    type: 'inside'
+                                }],
+                                series: [{
+                                    data: hums.map(function (item) {
+                                        return item[1];
+                                    }),
+                                }]
+                            });
+                            myChart3.setOption({
+                                xAxis: {
+                                    data: co2s.map(function (item) {
+                                        return item[0];
+                                    })
+                                },
+                                dataZoom: [{
+                                    startValue: co2s[80][0]
+                                }, {
+                                    type: 'inside'
+                                }],
+                                series: [{
+                                    data: co2s.map(function (item) {
+                                        return item[1];
+                                    }),
+                                }]
+                            });
+                            myChart4.setOption({
+                                xAxis: {
+                                    data: lights.map(function (item) {
+                                        return item[0];
+                                    })
+                                },
+                                dataZoom: [{
+                                    startValue: lights[80][0]
+                                }, {
+                                    type: 'inside'
+                                }],
+                                series: [{
+                                    data: lights.map(function (item) {
+                                        return item[1];
+                                    }),
+                                }]
+                            });
+                        },
+                        error: function() {
+                            // alert("失败，请稍后再试！");
+                        }
+                    });
+                }
+                getNewData();
+            });
+
+            // Echarts1
+            function Echarts1() {
+                myChart1.setOption(option = {
+                    title: {
+                        text: '温度'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    xAxis: {
+                        name: '时间(s)',
+                        data: temps.map(function (item) {
+                            return item[0];
+                        })
+                    },
+                    yAxis: {
+                        name: '温度(℃)',
+                        splitLine: {
+                            show: false
+                        },
+                        scale:true
+                    },
+                    toolbox: {
+                        left: 'center',
+                        feature: {
+                            dataZoom: {
+                                yAxisIndex: 'none'
+                            },
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    dataZoom: [{
+                        startValue: ''
+                    }, {
+                        type: 'inside'
+                    }],
+                    visualMap: {
+                        top: 10,
+                        right: 10,
+                        pieces: [{
+                            gt: 0,
+                            lte: 18,
+                            color: '#096'
+                        }, {
+                            gt: 18,
+                            lte: 25,
+                            color: '#ffde33'
+                        }, {
+                            gt: 25,
+                            color: '#ff9933'
+                        }],
+                        outOfRange: {
+                            color: '#999'
+                        }
+                    },
+                    series: {
+                        name: '温度',
+                        type: 'line',
+                        data: temps.map(function (item) {
+                            return item[1];
+                        }),
+                        markLine: {
+                            silent: true,
+                            data: [{
+                                yAxis: 18
+                            }, {
+                                yAxis: 25
+                            }]
+                        }
+                    }
+                });
+            }
+            // Echarts2
+            function Echarts2() {
+                myChart2.setOption(option = {
+                    title: {
+                        text: '湿度'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    xAxis: {
+                        name: '时间(s)',
+                        data: hums.map(function (item) {
+                            return item[0];
+                        })
+                    },
+                    yAxis: {
+                        name: '湿度(%RH)',
+                        splitLine: {
+                            show: false
+                        },
+                        scale:true
+                    },
+                    toolbox: {
+                        left: 'center',
+                        feature: {
+                            dataZoom: {
+                                yAxisIndex: 'none'
+                            },
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    dataZoom: [{
+                        startValue: ''
+                    }, {
+                        type: 'inside'
+                    }],
+                    visualMap: {
+                        top: 10,
+                        right: 10,
+                        pieces: [{
+                            gt: 0,
+                            lte: 45,
+                            color: '#096'
+                        }, {
+                            gt: 45,
+                            lte: 65,
+                            color: '#ffde33'
+                        }, {
+                            gt: 65,
+                            lte: 100,
+                            color: '#ff9933'
+                        }],
+                        outOfRange: {
+                            color: '#999'
+                        }
+                    },
+                    series: {
+                        name: '湿度',
+                        type: 'line',
+                        data: hums.map(function (item) {
+                            return item[1];
+                        }),
+                        markLine: {
+                            silent: true,
+                            data: [{
+                                yAxis: 45
+                            }, {
+                                yAxis: 65
+                            }]
+                        }
+                    }
+                });
+            }
+            // Echarts3
+            function Echarts3() {
+                myChart3.setOption(option = {
+                    title: {
+                        text: 'co2'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    xAxis: {
+                        name: '时间(s)',
+                        data: co2s.map(function (item) {
+                            return item[0];
+                        })
+                    },
+                    yAxis: {
+                        name: 'co2(ppm)',
+                        splitLine: {
+                            show: false
+                        },
+                        scale:true
+                    },
+                    toolbox: {
+                        left: 'center',
+                        feature: {
+                            dataZoom: {
+                                yAxisIndex: 'none'
+                            },
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    dataZoom: [{
+                        startValue: ''
+                    }, {
+                        type: 'inside'
+                    }],
+                    visualMap: {
+                        top: 10,
+                        right: 10,
+                        pieces: [{
+                            gt: 0,
+                            lte: 350,
+                            color: '#096'
+                        }, {
+                            gt: 350,
+                            lte: 450,
+                            color: '#ffde33'
+                        }, {
+                            gt: 450,
+                            lte: 1000,
+                            color: '#ff9933'
+                        }, {
+                            gt: 1000,
+                            lte: 2000,
+                            color: '#cc0033'
+                        }, {
+                            gt: 2000,
+                            lte: 5000,
+                            color: '#660099'
+                        }, {
+                            gt: 5000,
+                            color: '#7e0023'
+                        }],
+                        outOfRange: {
+                            color: '#999'
+                        }
+                    },
+                    series: {
+                        name: 'co2',
+                        type: 'line',
+                        data: co2s.map(function (item) {
+                            return item[1];
+                        }),
+                        markLine: {
+                            silent: true,
+                            data: [{
+                                yAxis: 350
+                            }, {
+                                yAxis: 450
+                            }, {
+                                yAxis: 1000
+                            }, {
+                                yAxis: 2000
+                            }, {
+                                yAxis: 5000
+                            }]
+                        }
+                    }
+                });
+            }
+            // Echarts4
+            function Echarts4() {
+                myChart4.setOption(option = {
+                    title: {
+                        text: '光照'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    xAxis: {
+                        name: '时间(s)',
+                        data: lights.map(function (item) {
+                            return item[0];
+                        })
+                    },
+                    yAxis: {
+                        name: '光照(Lux)',
+                        splitLine: {
+                            show: false
+                        },
+                        scale:true
+                    },
+                    toolbox: {
+                        left: 'center',
+                        feature: {
+                            dataZoom: {
+                                yAxisIndex: 'none'
+                            },
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    dataZoom: [{
+                        startValue: ''
+                    }, {
+                        type: 'inside'
+                    }],
+                    visualMap: {
+                        top: 10,
+                        right: 10,
+                        pieces: [{
+                            gt: 0,
+                            lte: 100,
+                            color: '#096'
+                        }, {
+                            gt: 100,
+                            lte: 150,
+                            color: '#ffde33'
+                        }, {
+                            gt: 150,
+                            lte: 300,
+                            color: '#ff9933'
+                        }, {
+                            gt: 300,
+                            lte: 600,
+                            color: '#cc0033'
+                        }, {
+                            gt: 600,
+                            color: '#660099'
+                        }],
+                        outOfRange: {
+                            color: '#999'
+                        }
+                    },
+                    series: {
+                        name: '光照',
+                        type: 'line',
+                        data: lights.map(function (item) {
+                            return item[1];
+                        }),
+                        markLine: {
+                            silent: true,
+                            data: [{
+                                yAxis: 100
+                            }, {
+                                yAxis: 150
+                            }, {
+                                yAxis: 300
+                            }, {
+                                yAxis: 600
+                            }]
+                        }
+                    }
+                });
+            }
+            Echarts1()
+            Echarts2()
+            Echarts3()
+            Echarts4()
+        </script>
+    </body>
+</html>
